@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Positive;
 import java.util.Date;
 
 public record StudySessionRequestDTO(
-        @NotBlank(message = "A data da sessão é obrigatória")
+        @NotNull(message = "A data da sessão é obrigatória")
         @PastOrPresent(message = "A data não pode estar no futuro")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
         Date date,
