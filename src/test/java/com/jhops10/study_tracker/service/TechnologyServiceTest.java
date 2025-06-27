@@ -2,6 +2,7 @@ package com.jhops10.study_tracker.service;
 
 import com.jhops10.study_tracker.dto.technology.TechnologyRequestDTO;
 import com.jhops10.study_tracker.dto.technology.TechnologyResponseDTO;
+import com.jhops10.study_tracker.exception.TechnologyNotFoundException;
 import com.jhops10.study_tracker.model.Technology;
 import com.jhops10.study_tracker.repository.TechnologyRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,6 +90,30 @@ class TechnologyServiceTest {
         assertTrue(sut.isEmpty());
 
         verify(technologyRepository).findAll();
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void getTechnologyById_whenIdExists_shouldReturnTechnology() {
+        when(technologyRepository.findById(1L)).thenReturn(Optional.of(defaultTech));
+
+        TechnologyResponseDTO sut = technologyService.getById(1L);
+
+        assertEquals("Example Name", sut.name());
+        assertEquals("www.exampleurl.com", sut.imageUrl());
+        assertEquals("Short description", sut.shortDescription());
+
+        verify(technologyRepository).findById(1L);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void getTechnologyById_whenIdDoesNotExist_shouldThrowException() {
+        when(technologyRepository.findById(99999L)).thenReturn(Optional.empty());
+
+        assertThrows(TechnologyNotFoundException.class, () -> technologyService.getById(99999L));
+
+        verify(technologyRepository).findById(99999L);
         verifyNoMoreInteractions(technologyRepository);
     }
 }
