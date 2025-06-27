@@ -11,6 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -56,6 +59,35 @@ class TechnologyServiceTest {
         assertEquals(defaultTech.getShortDescription(), sut.shortDescription());
 
         verify(technologyRepository).save(any(Technology.class));
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void getAllTechnologies_shouldReturnAllTechnologies() {
+        when(technologyRepository.findAll()).thenReturn(List.of(defaultTech));
+
+        List<TechnologyResponseDTO> sut = technologyService.getAll();
+
+        assertEquals(1, sut.size());
+        assertEquals(1, sut.get(0).id());
+        assertEquals("Example Name", sut.get(0).name());
+        assertEquals("www.exampleurl.com", sut.get(0).imageUrl());
+        assertEquals("Short description", sut.get(0).shortDescription());
+
+        verify(technologyRepository).findAll();
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void getAllTechnologies_whenNoneAvailable_shouldReturnEmptyList() {
+        when(technologyRepository.findAll()).thenReturn(List.of());
+
+        List<TechnologyResponseDTO> sut = technologyService.getAll();
+
+        assertNotNull(sut);
+        assertTrue(sut.isEmpty());
+
+        verify(technologyRepository).findAll();
         verifyNoMoreInteractions(technologyRepository);
     }
 }
