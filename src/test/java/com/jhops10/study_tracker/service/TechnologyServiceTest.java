@@ -151,4 +151,25 @@ class TechnologyServiceTest {
         verify(technologyRepository).findById(999L);
         verifyNoMoreInteractions(technologyRepository);
     }
+
+    @Test
+    void deleteTechnology_whenIdExists_shouldDeleteTechnologySucessfully() {
+        when(technologyRepository.existsById(defaultTech.getId())).thenReturn(true);
+
+        technologyService.delete(defaultTech.getId());
+
+        verify(technologyRepository).existsById(1L);
+        verify(technologyRepository).deleteById(1L);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void deleteTechnology_whenIdDoesNotExist_shouldTrhowException() {
+        when(technologyRepository.existsById(999L)).thenReturn(false);
+
+        assertThrows(TechnologyNotFoundException.class, () -> technologyService.delete(999L));
+
+        verify(technologyRepository).existsById(999L);
+        verifyNoMoreInteractions(technologyRepository);
+    }
 }
