@@ -2,6 +2,7 @@ package com.jhops10.study_tracker.service;
 
 import com.jhops10.study_tracker.dto.study_session.StudySessionRequestDTO;
 import com.jhops10.study_tracker.dto.study_session.StudySessionResponseDTO;
+import com.jhops10.study_tracker.exception.StudySessionNotFoundException;
 import com.jhops10.study_tracker.exception.TechnologyNotFoundException;
 import com.jhops10.study_tracker.model.StudySession;
 import com.jhops10.study_tracker.model.Technology;
@@ -132,6 +133,32 @@ class StudySessionServiceTest {
         verifyNoMoreInteractions(studySessionRepository);
     }
 
+    @Test
+    void getById_whenIdExists_shouldReturnSession() {
+        when(studySessionRepository.findById(1L)).thenReturn(Optional.of(defaultStudySession));
+
+        StudySessionResponseDTO sut = studySessionService.getById(1L);
+
+        assertNotNull(sut);
+        assertEquals(1L, sut.id());
+        assertEquals("Example Topic", sut.topic());
+        assertEquals(1L, sut.technologyId());
+        assertEquals(2.5, sut.hoursStudied());
+
+        verify(studySessionRepository).findById(1L);
+        verifyNoMoreInteractions(studySessionRepository);
+    }
+
+    @Test
+    void getById_whenIdDoesNotExists_shouldThrowException() {
+        Long nonexistentSessionId = 999L;
+        when(studySessionRepository.findById(nonexistentSessionId)).thenReturn(Optional.empty());
+
+        assertThrows(StudySessionNotFoundException.class, () -> studySessionService.getById(nonexistentSessionId));
+
+        verify(studySessionRepository).findById(nonexistentSessionId);
+        verifyNoMoreInteractions(studySessionRepository);
+    }
 
 
 }
