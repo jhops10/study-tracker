@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,5 +102,36 @@ class StudySessionServiceTest {
         verifyNoMoreInteractions(technologyRepository);
         verifyNoInteractions(studySessionRepository);
     }
+
+    @Test
+    void getAll_shouldReturnAllStudySessions() {
+        when(studySessionRepository.findAll()).thenReturn(List.of(defaultStudySession));
+
+        List<StudySessionResponseDTO> sut = studySessionService.getAll();
+
+        assertEquals(1, sut.size());
+        assertEquals(1, sut.get(0).id());
+        assertEquals("Example Topic", sut.get(0).topic());
+        assertEquals(1L, sut.get(0).technologyId());
+        assertEquals(2.5, sut.get(0).hoursStudied());
+
+        verify(studySessionRepository).findAll();
+        verifyNoMoreInteractions(studySessionRepository);
+    }
+
+    @Test
+    void getAll_whenNoneAvailable_shouldReturnEmptyList() {
+        when(studySessionRepository.findAll()).thenReturn(List.of());
+
+        List<StudySessionResponseDTO> sut = studySessionService.getAll();
+
+        assertNotNull(sut);
+        assertTrue(sut.isEmpty());
+
+        verify(studySessionRepository).findAll();
+        verifyNoMoreInteractions(studySessionRepository);
+    }
+
+
 
 }
