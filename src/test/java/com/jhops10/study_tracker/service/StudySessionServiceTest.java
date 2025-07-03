@@ -2,6 +2,7 @@ package com.jhops10.study_tracker.service;
 
 import com.jhops10.study_tracker.dto.study_session.StudySessionRequestDTO;
 import com.jhops10.study_tracker.dto.study_session.StudySessionResponseDTO;
+import com.jhops10.study_tracker.dto.study_session.StudySessionUpdateDTO;
 import com.jhops10.study_tracker.exception.StudySessionNotFoundException;
 import com.jhops10.study_tracker.exception.TechnologyNotFoundException;
 import com.jhops10.study_tracker.model.StudySession;
@@ -160,5 +161,43 @@ class StudySessionServiceTest {
         verifyNoMoreInteractions(studySessionRepository);
     }
 
+    @Test
+    void update_whenIdExists_shouldUpdateAndReturnSession() {
+        Long sessionId = 1L;
+
+        StudySessionUpdateDTO updateDTO = mock(StudySessionUpdateDTO.class);
+
+        when(studySessionRepository.findById(sessionId)).thenReturn(Optional.of(defaultStudySession));
+        when(studySessionRepository.save(any(StudySession.class))).thenReturn(defaultStudySession);
+
+        StudySessionResponseDTO sut = studySessionService.update(sessionId, updateDTO);
+
+        assertNotNull(sut);
+        assertEquals(1L, sut.id());
+        assertEquals("Example Topic", sut.topic());
+        assertEquals(1L, sut.technologyId());
+        assertEquals(2.5, sut.hoursStudied());
+
+        verify(studySessionRepository).findById(sessionId);
+        verify(updateDTO).applyUpdatesTo(defaultStudySession, technologyRepository); // essencial
+        verify(studySessionRepository).save(defaultStudySession);
+        verifyNoMoreInteractions(studySessionRepository);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void update_whenIdDoesNotExist_shouldThrowException() {
+        Long nonexistentId = 999L;
+        StudySessionUpdateDTO updateDTO = mock(StudySessionUpdateDTO.class);
+
+        when(studySessionRepository.findById(nonexistentId)).thenReturn(Optional.empty());
+
+        assertThrows(StudySessionNotFoundException.class, () -> studySessionService.update(nonexistentId, updateDTO));
+
+        verify(studySessionRepository).findById(nonexistentId);
+        verifyNoMoreInteractions(studySessionRepository);
+        verifyNoInteractions(technologyRepository);
+        verifyNoInteractions(updateDTO); // não deve ser chamado
+    }
 
 }
