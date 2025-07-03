@@ -197,7 +197,31 @@ class StudySessionServiceTest {
         verify(studySessionRepository).findById(nonexistentId);
         verifyNoMoreInteractions(studySessionRepository);
         verifyNoInteractions(technologyRepository);
-        verifyNoInteractions(updateDTO); // não deve ser chamado
+        verifyNoInteractions(updateDTO);
+    }
+
+    @Test
+    void delete_whenIdExists_shouldDeleteSessionSuccessfully() {
+        Long validId = 1L;
+
+        when(studySessionRepository.existsById(validId)).thenReturn(true);
+
+        studySessionService.delete(validId);
+
+        verify(studySessionRepository).existsById(validId);
+        verify(studySessionRepository).deleteById(validId);
+        verifyNoMoreInteractions(studySessionRepository);
+    }
+
+    @Test
+    void delete_whenIdDoesNotExist_shouldThrowException() {
+        Long nonexistentId = 999L;
+        when(studySessionRepository.existsById(nonexistentId)).thenReturn(false);
+
+        assertThrows(StudySessionNotFoundException.class, () -> studySessionService.delete(nonexistentId));
+
+        verify(studySessionRepository).existsById(nonexistentId);
+        verifyNoMoreInteractions(studySessionRepository);
     }
 
 }
