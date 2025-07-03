@@ -153,7 +153,7 @@ class TechnologyServiceTest {
     }
 
     @Test
-    void deleteTechnology_whenIdExists_shouldDeleteTechnologySucessfully() {
+    void deleteTechnology_whenIdExists_shouldDeleteTechnologySuccessfully() {
         when(technologyRepository.existsById(defaultTech.getId())).thenReturn(true);
 
         technologyService.delete(defaultTech.getId());
@@ -164,7 +164,7 @@ class TechnologyServiceTest {
     }
 
     @Test
-    void deleteTechnology_whenIdDoesNotExist_shouldTrhowException() {
+    void deleteTechnology_whenIdDoesNotExist_shouldThrowException() {
         when(technologyRepository.existsById(999L)).thenReturn(false);
 
         assertThrows(TechnologyNotFoundException.class, () -> technologyService.delete(999L));
