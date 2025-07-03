@@ -2,6 +2,7 @@ package com.jhops10.study_tracker.service;
 
 import com.jhops10.study_tracker.dto.technology.TechnologyRequestDTO;
 import com.jhops10.study_tracker.dto.technology.TechnologyResponseDTO;
+import com.jhops10.study_tracker.dto.technology.TechnologyUpdateDTO;
 import com.jhops10.study_tracker.exception.TechnologyNotFoundException;
 import com.jhops10.study_tracker.model.Technology;
 import com.jhops10.study_tracker.repository.TechnologyRepository;
@@ -114,6 +115,61 @@ class TechnologyServiceTest {
         assertThrows(TechnologyNotFoundException.class, () -> technologyService.getById(99999L));
 
         verify(technologyRepository).findById(99999L);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void updateTechnology_whenIdExists_shouldReturnUpdatedTechnology() {
+        TechnologyUpdateDTO updateDTO = new TechnologyUpdateDTO("Updated Name", "www.updatedurl.com", "Updated description");
+        Technology updatedTech = createNewTech(defaultTech.getId(), updateDTO.name(), updateDTO.imageUrl(), updateDTO.shortDescription());
+
+        when(technologyRepository.findById(defaultTech.getId())).thenReturn(Optional.of(defaultTech));
+        when(technologyRepository.save(any(Technology.class))).thenReturn(updatedTech);
+
+
+        TechnologyResponseDTO sut = technologyService.update(defaultTech.getId(), updateDTO);
+        
+        assertNotNull(sut);
+        assertEquals(updatedTech.getId(), sut.id());
+        assertEquals(updatedTech.getName(), sut.name());
+        assertEquals(updatedTech.getImageUrl(), sut.imageUrl());
+        assertEquals(updatedTech.getShortDescription(), sut.shortDescription());
+
+        verify(technologyRepository).findById(defaultTech.getId());
+        verify(technologyRepository).save(defaultTech);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void updateTechnology_whenIdDoesNotExist_shouldThrowException() {
+        TechnologyUpdateDTO updateDTO = new TechnologyUpdateDTO("Updated Name", "updated-url", "Updated Description");
+
+        when(technologyRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(TechnologyNotFoundException.class, () -> technologyService.update(999L, updateDTO));
+
+        verify(technologyRepository).findById(999L);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void deleteTechnology_whenIdExists_shouldDeleteTechnologySuccessfully() {
+        when(technologyRepository.existsById(defaultTech.getId())).thenReturn(true);
+
+        technologyService.delete(defaultTech.getId());
+
+        verify(technologyRepository).existsById(1L);
+        verify(technologyRepository).deleteById(1L);
+        verifyNoMoreInteractions(technologyRepository);
+    }
+
+    @Test
+    void deleteTechnology_whenIdDoesNotExist_shouldThrowException() {
+        when(technologyRepository.existsById(999L)).thenReturn(false);
+
+        assertThrows(TechnologyNotFoundException.class, () -> technologyService.delete(999L));
+
+        verify(technologyRepository).existsById(999L);
         verifyNoMoreInteractions(technologyRepository);
     }
 }
